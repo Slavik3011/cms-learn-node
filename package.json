@@ -1,0 +1,15 @@
+{
+  "name": "cms",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:Slavik3011/cms-learn-node.git",
+  "author": "Slavik3011 <Slavik3011@yandex.ru>",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.16.3",
+    "express-handlebars": "^3.0.0"
+  },
+  "scripts": {
+    "start": "node ./app.js"
+  }
+}
