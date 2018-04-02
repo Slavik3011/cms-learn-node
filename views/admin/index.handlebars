@@ -1,0 +1,2 @@
+<h1>Blank</h1>
+<p>This is an example of a blank page that you can use as a starting point for creating new ones.</p>
