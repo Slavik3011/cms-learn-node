@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Post = require('../../models/Post');
+const { isEmpty } = require('../../helpers/upload-helper');
 
 router.all('/*', (req, res, next) => {
   req.app.locals.layout = 'admin';
@@ -17,17 +18,37 @@ router.get('/create', (req, res) => {
 
 router.post('/create', (req, res) => {
   let { title, status, allowComments, body } = req.body;
-  allowComments = !!allowComments;
-  const newPost = Post({
-    title,
-    status,
-    allowComments,
-    body
-  });
+  let fileName = 'no-photo.png';
+  const errors = [];
 
-  newPost.save()
-    .then(() => res.redirect('/admin/posts'))
-    .catch(err => console.log("Couldn't save post", err));
+  if(!title) errors.push({message: 'Please add a title'});
+  if(!body) errors.push({message: 'Please add a description'});
+
+  if (errors.length) {
+    res.render('admin/posts/create', { errors });
+  } else {
+    if (!isEmpty(req.files)) {
+      const file = req.files.file;
+      fileName = `${Date.now()}-${file.name}`;
+      const dirUploads = './public/uploads/';
+      file.mv(dirUploads + fileName, err => {
+        if (err) throw err;
+      });
+    }
+
+    allowComments = !!allowComments;
+    const newPost = Post({
+      title,
+      status,
+      allowComments,
+      body,
+      file: fileName
+    });
+
+    newPost.save()
+      .then(() => res.redirect('/admin/posts'))
+      .catch(err => console.log("Couldn't save post", err));
+  }
 });
 
 router.get('/edit/:id', (req, res) => {
