@@ -5,6 +5,8 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
 const upload = require('express-fileupload');
+const session = require('express-session');
+const flash = require('connect-flash');
 
 mongoose.Promise = global.Promise;
 
@@ -19,8 +21,8 @@ const port = process.env.port || 3000;
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Set view engine
-const { select } = require('./helpers/handlebars-helpers');
-app.engine('handlebars', hbs({ defaultLayout: 'home', helpers: { select }}));
+const { select, generateTime } = require('./helpers/handlebars-helpers');
+app.engine('handlebars', hbs({ defaultLayout: 'home', helpers: { select, generateTime }}));
 app.set('view engine', 'handlebars');
 
 //Upload Middleware
@@ -32,6 +34,24 @@ app.use(bodyParser.json());
 
 //Method Override
 app.use(methodOverride('_method'));
+
+
+app.use(session({
+  secret: 'supersecret',
+  resave: true,
+  saveUninitialized: true,
+  cookie: { secure: true }
+}));
+
+app.use(flash());
+
+//Local Variables using Middleware
+app.use((req, res, next) => {
+  res.locals.success_message = req.flash('success_message');
+  console.log(req.flash())
+  console.log(req.flash('success_message'))
+  next()
+});
 
 // Load routes
 const home = require('./routes/home');
@@ -46,3 +66,6 @@ app.use('/admin/posts', posts);
 app.listen(port, () => {
   console.log(`Server started on port ${port}`);
 });
+
+// TODO flashes after create post 114 lesson(not working)
+// TODO not delete default post image
