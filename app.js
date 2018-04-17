@@ -57,11 +57,13 @@ app.use((req, res, next) => {
 const home = require('./routes/home');
 const admin = require('./routes/admin');
 const posts = require('./routes/admin/posts');
+const categories = require('./routes/admin/categories');
 
 // Use routes
 app.use('/', home);
 app.use('/admin', admin);
 app.use('/admin/posts', posts);
+app.use('/admin/categories', categories);
 
 app.listen(port, () => {
   console.log(`Server started on port ${port}`);
