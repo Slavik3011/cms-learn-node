@@ -1,4 +1,5 @@
 const express = require('express');
+const Post = require('../../models/Post');
 const router = express.Router();
 
 router.all('*', (req, res, next) => {
@@ -7,7 +8,9 @@ router.all('*', (req, res, next) => {
 });
 
 router.get('/', (req, res) => {
-  res.render('home/index');
+  Post.find({}).then(posts => {
+    res.render('home/index', { posts });
+  });
 });
 
 router.get('/about', (req, res) => {
@@ -20,6 +23,13 @@ router.get('/login', (req, res) => {
 
 router.get('/register', (req, res) => {
   res.render('home/register');
+});
+
+router.get('/post/:id', (req, res) => {
+  Post.findById(req.params.id)
+    .then(post => {
+      res.render('home/post', { post });
+    });
 });
 
 module.exports = router;

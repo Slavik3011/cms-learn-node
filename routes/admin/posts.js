@@ -1,7 +1,9 @@
 const express = require('express');
+const fs = require('fs');
+const path = require('path');
 const router = express.Router();
 const Post = require('../../models/Post');
-const { isEmpty } = require('../../helpers/upload-helper');
+const { isEmpty, uploadDir } = require('../../helpers/upload-helper');
 
 router.all('/*', (req, res, next) => {
   req.app.locals.layout = 'admin';
@@ -46,7 +48,10 @@ router.post('/create', (req, res) => {
     });
 
     newPost.save()
-      .then(() => res.redirect('/admin/posts'))
+      .then((savedPost) => {
+        req.flash('success-message', `Post ${savedPost.title} was created successfully.`);
+        res.redirect('/admin/posts')
+      })
       .catch(err => console.log("Couldn't save post", err));
   }
 });
@@ -65,12 +70,35 @@ router.put('/edit/:id', (req, res) => {
       post.status = status;
       post.allowComments = allowComments;
       post.body = body;
-      post.save().then(() => res.redirect('/admin/posts'));
+
+      if (!isEmpty(req.files)) {
+        const file = req.files.file;
+        const fileName = `${Date.now()}-${file.name}`;
+        const dirUploads = './public/uploads/';
+        file.mv(dirUploads + fileName, err => {
+          if (err) throw err;
+        });
+        post.file = fileName;
+      }
+
+      post.save().then(() => {
+        req.flash('success_message', 'Post was successfully updated');
+        res.redirect('/admin/posts')
+      });
+
     });
 });
 
 router.delete('/:id', (req, res) => {
-  Post.remove({_id: req.params.id}).then(() => res.redirect('/admin/posts'))
+  Post.findOne({_id: req.params.id})
+    .then(post => {
+      fs.unlink(uploadDir + post.file, () => {
+        post.remove();
+        req.flash('success_message', 'Post was successfully deleted');
+        res.redirect('/admin/posts');
+      });
+
+    })
 });
 
 module.exports = router;
