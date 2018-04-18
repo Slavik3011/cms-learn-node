@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const router = express.Router();
 const Post = require('../../models/Post');
+const Category = require('../../models/Category');
 const { isEmpty, uploadDir } = require('../../helpers/upload-helper');
 
 router.all('/*', (req, res, next) => {
@@ -15,7 +16,7 @@ router.get('/', (req, res) => {
 });
 
 router.get('/create', (req, res) => {
-  res.render('admin/posts/create')
+  Category.find().then(categories => res.render('admin/posts/create', { categories }))
 });
 
 router.post('/create', (req, res) => {
@@ -58,7 +59,11 @@ router.post('/create', (req, res) => {
 
 router.get('/edit/:id', (req, res) => {
   Post.findById(req.params.id)
-    .then(post => res.render('admin/posts/edit', {post}));
+    .then(post => {
+      Category.find().then(categories => {
+        res.render('admin/posts/edit', { post, categories })
+      });
+    });
 });
 
 router.put('/edit/:id', (req, res) => {

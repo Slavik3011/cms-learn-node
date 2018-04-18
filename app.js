@@ -71,3 +71,4 @@ app.listen(port, () => {
 
 // TODO flashes after create post 114 lesson(not working)
 // TODO not delete default post image
+//TODO rewrite wiew for categories widget
